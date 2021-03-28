@@ -696,6 +696,14 @@ class FlowRunner(Runner):
             self.logger.info("Flow run SUCCESS: no reference tasks failed")
             state = Success(message="No reference tasks failed.", result=return_states)
 
+        if self.flow.terminal_state_handler:
+            return self.flow.terminal_state_handler(
+                state=state,
+                key_states=key_states,
+                return_states=return_states,
+                terminal_states=terminal_states,
+            )
+
         return state
 
 

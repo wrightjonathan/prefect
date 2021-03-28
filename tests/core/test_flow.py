@@ -17,6 +17,8 @@ import pendulum
 import pytest
 import toml
 
+from typing import Dict, Set
+
 import prefect
 from prefect import task
 from prefect.core.edge import Edge
@@ -3252,3 +3254,27 @@ class TestSlugGeneration:
             flow.add_task(a2)
 
         assert flow.slugs == {a1: "a-1", a2: "a-2"}
+
+
+def test_terminal_state_handler_determines_final_state():
+    def fake_terminal_state_handler(
+        state: State,
+        key_states: Set[State],
+        return_states: Dict[Task, State],
+        terminal_states: Set[State],
+    ) -> State:
+        task_i_really_care_about = "fake_2"
+        for task, task_state in return_states.items():
+            if task.name == task_i_really_care_about and task_state.is_successful():
+                state.message = "Custom message here"
+        return state
+
+    with Flow("test", terminal_state_handler=fake_terminal_state_handler) as flow:
+        fake_task = Task("fake")
+        flow.add_task(fake_task)
+        fake_task_2 = Task("fake_2")
+        flow.add_task(fake_task_2)
+        fake_task_2.set_upstream(fake_task)
+
+    assert flow.terminal_state_handler == fake_terminal_state_handler
+    assert flow.run().message == "Custom message here"
