@@ -698,6 +698,7 @@ class FlowRunner(Runner):
 
         if self.flow.terminal_state_handler:
             return self.flow.terminal_state_handler(
+                flow=self,
                 state=state,
                 key_states=key_states,
                 return_states=return_states,

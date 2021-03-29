@@ -3258,6 +3258,7 @@ class TestSlugGeneration:
 
 def test_terminal_state_handler_determines_final_state():
     def fake_terminal_state_handler(
+        flow: Flow,
         state: State,
         key_states: Set[State],
         return_states: Dict[Task, State],
